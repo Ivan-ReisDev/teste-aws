@@ -30,7 +30,6 @@ jobs:
         chmod 600 private_key.pem
         ssh -i private_key.pem ubuntu@ec2-56-124-35-86.sa-east-1.compute.amazonaws.com << 'EOF'
         cd /home/ubuntu/portfolio-api
-        sudo docker pull ivanreisdev/web:latest
         sudo docker stop teste-aws || true
         sudo docker rm teste-aws || true
         sudo docker run -d -p 3000:3000 --name teste-aws ivanreisdev/web:latest
