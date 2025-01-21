@@ -33,6 +33,6 @@ jobs:
         sudo docker pull ivanreisdev/web:latest
         sudo docker stop teste-aws || true
         sudo docker rm teste-aws || true
-        sudo docker run -d -p 3000:3000 ivanreisdev/web:latest
+        sudo docker run -d -p 3000:3000 --name teste-aws ivanreisdev/web:latest
         sudo systemctl restart nginx
         EOF
