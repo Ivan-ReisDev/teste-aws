@@ -1,0 +1,40 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Deploy to EC2
+      uses: easingthemes/ssh-deploy@main
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+        SOURCE: "/" 
+        REMOTE_HOST: "ec2-56-124-35-86.sa-east-1.compute.amazonaws.com" 
+        REMOTE_USER: "ubuntu" 
+        TARGET: "/home/ubuntu/teste" 
+        EXCLUDE: "dist/,node_modules/,prisma/,docker-compose.yml,.git*,*.yml,.env" 
+        ARGS: "-avzr --delete"
+
+    - name: Deploy Docker Image and Restart App
+      run: |
+        echo "${{ secrets.EC2_PRIVATE_KEY }}" > private_key.pem
+        chmod 600 private_key.pem
+        ssh -i private_key.pem ubuntu@ec2-56-124-35-86.sa-east-1.compute.amazonaws.com << 'EOF'
+        cd /home/ubuntu/portfolio-api
+        sudo docker pull ivanreisdev/web:latest
+        sudo docker stop teste-aws || true
+        sudo docker rm teste-aws || true
+        sudo docker run -d --name teste-aws \
+          -p 3000:3000 \
+          ivanreisdev/web:latest
+        sudo systemctl restart nginx
+        EOF
